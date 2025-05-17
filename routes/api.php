@@ -26,6 +26,7 @@ Route::get('/ping', function () {
 
 // Restaurant endpoints - returns list of all restaurants
 Route::get('/restaurants', [RestaurantController::class, 'index'])->middleware('validate.restaurant');
+Route::get('/restaurants/{place_id}', [RestaurantController::class, 'show'])->middleware('validate.place_id');
 
 // Photo endpoints - returns image buffer
 Route::get('/photo', [PhotoController::class, 'index'])->middleware('validate.photo');

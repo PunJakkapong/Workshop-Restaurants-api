@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'validate.restaurant' => \App\Http\Middleware\ValidateRestaurantRequest::class,
         'validate.photo' => \App\Http\Middleware\ValidatePhotoRequest::class,
+        'validate.place_id' => \App\Http\Middleware\ValidatePlaceIdRequest::class,
     ];
 }
