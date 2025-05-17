@@ -46,20 +46,25 @@ class RestaurantController extends Controller
             });
         }
 
-        // search for restaurants using google places API, radius default = 3000 meters
-        $client = new \GuzzleHttp\Client();
-        $response = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
-            'query' => [
-                'location' => $location,
-                'radius' => 3000,
-                'type' => 'restaurant',
-                'query' => $keyword,
-                'key' => env('GOOGLE_MAPS_API_KEY')
-            ]
-        ]);
+        // cache for 30 mins to reduce API calls and improve performance
+        $cacheKey = 'restaurants_' . md5($location . $keyword);
+        $places = cache()->remember($cacheKey, now()->addMinutes(30), function () use ($location, $keyword) {
+            // search for restaurants using google places API, radius default = 3000 meters
+            $client = new \GuzzleHttp\Client();
+            $response = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
+                'query' => [
+                    'location' => $location,
+                    'radius' => 3000,
+                    'type' => 'restaurant',
+                    'query' => $keyword,
+                    'key' => env('GOOGLE_MAPS_API_KEY')
+                ]
+            ]);
+
+            return json_decode($response->getBody(), true);
+        });
 
         // return results as json
-        $places = json_decode($response->getBody(), true);
         return response()->json($places);
     }
 
