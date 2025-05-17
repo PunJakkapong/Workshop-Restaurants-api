@@ -1,4 +1,11 @@
 For run on workshop project
+
+create file .env by copy from .env.example
+set GOOGLE_MAPS_API_KEY as your google maps api key
+```bash
+GOOGLE_MAPS_API_KEY={your_google_maps_api_key}
+```
+then
 ```bash
 php artisan serve
 ```
