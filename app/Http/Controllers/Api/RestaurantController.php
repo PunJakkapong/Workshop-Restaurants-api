@@ -11,20 +11,6 @@ class RestaurantController extends Controller
 {
     public function index(Request $request)
     {
-        /**
-         * Search for restaurants using Google Places API
-         * 
-         * @param Request $request
-         * @return \Illuminate\Http\JsonResponse
-         * 
-         * Flow:
-         * 1. Get keyword and location from request
-         * 2. If keyword is 'Bang sue', use hardcoded coordinates
-         * 3. If location provided, geocode it to get coordinates
-         * 4. Search for restaurants using Places API
-         * 5. Return results as JSON
-         */
-
         // get keyword from request set default = 'Bang sue', this key is required
         $keyword = trim($request->query('keyword', 'Bang sue'));
 
@@ -60,8 +46,7 @@ class RestaurantController extends Controller
             });
         }
 
-
-        // search for restaurants using google places API
+        // search for restaurants using google places API, radius default = 3000 meters
         $client = new \GuzzleHttp\Client();
         $response = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
             'query' => [
@@ -76,5 +61,25 @@ class RestaurantController extends Controller
         // return results as json
         $places = json_decode($response->getBody(), true);
         return response()->json($places);
+    }
+
+    public function show(Request $request, $placeId)
+    {
+        $cacheKey = 'place_details_' . $placeId;
+
+        // Cache for 24 hours to reduce API calls and improve performance
+        $place = cache()->remember($cacheKey, now()->addHours(24), function () use ($placeId) {
+            $client = new \GuzzleHttp\Client();
+            $response = $client->get('https://maps.googleapis.com/maps/api/place/details/json', [
+                'query' => [
+                    'place_id' => $placeId,
+                    'key' => env('GOOGLE_MAPS_API_KEY')
+                ]
+            ]);
+
+            return json_decode($response->getBody(), true);
+        });
+
+        return response()->json($place);
     }
 }
