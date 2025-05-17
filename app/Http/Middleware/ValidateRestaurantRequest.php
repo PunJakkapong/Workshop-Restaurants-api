@@ -9,7 +9,7 @@ class ValidateRestaurantRequest
 {
   public function handle(Request $request, Closure $next)
   {
-    $allowedParams = ['keyword', 'address'];
+    $allowedParams = ['keyword', 'address', 'next_page_token'];
     $requestParams = array_keys($request->all());
 
     // check if any parameters other than allowed
@@ -18,7 +18,7 @@ class ValidateRestaurantRequest
     if (!empty($invalidParams)) {
       return response()->json([
         'error' => 'Invalid parameters',
-        'message' => 'Only keyword and address parameters are allowed',
+        'message' => 'Only keyword, address and next_page_token parameters are allowed',
         'invalid_params' => array_values($invalidParams)
       ], 400);
     }

@@ -17,6 +17,9 @@ class RestaurantController extends Controller
         // get address from request set default = '', this key is not required
         $address = trim($request->query('address', ''));
 
+        // get pagetoken from request set default = '', this key is not required
+        $pagetoken = trim($request->query('next_page_token', ''));
+
         // set location as default location, address is 'Bang sue'
         $location = '13.8063886, 100.5307932';
 
@@ -47,8 +50,8 @@ class RestaurantController extends Controller
         }
 
         // cache for 30 mins to reduce API calls and improve performance
-        $cacheKey = 'restaurants_' . md5($location . $keyword);
-        $places = cache()->remember($cacheKey, now()->addMinutes(30), function () use ($location, $keyword) {
+        $cacheKey = 'restaurants_' . md5($location . $keyword . $pagetoken);
+        $places = cache()->remember($cacheKey, now()->addMinutes(30), function () use ($location, $keyword, $pagetoken) {
             // search for restaurants using google places API, radius default = 3000 meters
             $client = new \GuzzleHttp\Client();
             $response = $client->get('https://maps.googleapis.com/maps/api/place/textsearch/json', [
@@ -57,7 +60,8 @@ class RestaurantController extends Controller
                     'radius' => 3000,
                     'type' => 'restaurant',
                     'query' => $keyword,
-                    'key' => env('GOOGLE_MAPS_API_KEY')
+                    'key' => env('GOOGLE_MAPS_API_KEY'),
+                    'pagetoken' => $pagetoken,
                 ]
             ]);
 
